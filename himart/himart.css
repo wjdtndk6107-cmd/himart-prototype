@@ -1,0 +1,23 @@
+/* ─── Himart Prototype CSS ─────────────────────────────────────────────────── */
+
+/* Pretendard 웹폰트 */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+/* 전체 모바일 래퍼 */
+.himart-root {
+  width: 390px;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative;
+  background: #fff;
+  font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 스크롤바 숨기기 */
+.himart-root *::-webkit-scrollbar { display: none; }
+.himart-root * { scrollbar-width: none; -ms-overflow-style: none; }
+
+/* Pretendard 폰트 weight 매핑 */
+.font-pretendard { font-family: 'Pretendard Variable', 'Pretendard', sans-serif; }

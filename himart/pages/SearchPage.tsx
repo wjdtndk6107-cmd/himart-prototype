@@ -1,0 +1,536 @@
+"use client";
+
+import { useState, useRef, useLayoutEffect } from "react";
+import Image from "next/image";
+import imgProductMain from "../img/product-main.png";
+import imgDetailImage from "../img/product-detail.png";
+import imgReviewThumbnail from "../img/review-thumb.png";
+
+// ─── Types ───────────────────────────────────────────────────────
+type Screen = "main" | "results" | "noresult" | "detail";
+type Tab = "info" | "spec" | "review" | "qna";
+
+// ─── Hangul IME ───────────────────────────────────────────────────
+const CHO  = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+const JUNG = ["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"];
+const JONG = ["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+const CHO_IDX: Record<string,number>  = Object.fromEntries(CHO.map((c,i) => [c,i]));
+const JUNG_IDX: Record<string,number> = Object.fromEntries(JUNG.map((v,i) => [v,i]));
+const JONG_IDX: Record<string,number> = Object.fromEntries(JONG.map((f,i) => f ? [f,i] : []).filter(Boolean) as [string,number][]);
+const JONG_TO_CHO: Record<number,number> = {1:0,2:1,4:2,7:3,8:5,16:6,17:7,19:9,20:10,21:11,22:12,23:14,24:15,25:16,26:17,27:18};
+
+type IMEState = { cho: number; jung?: number; jong?: number } | null;
+
+function makeSyl(cho: number, jung: number, jong = 0) {
+  return String.fromCharCode(0xAC00 + cho * 21 * 28 + jung * 28 + jong);
+}
+function renderIME(s: IMEState): string {
+  if (!s) return "";
+  if (s.jung === undefined) return CHO[s.cho];
+  if (s.jong === undefined) return makeSyl(s.cho, s.jung);
+  return makeSyl(s.cho, s.jung, s.jong);
+}
+function pressKey(key: string, committed: string, ime: IMEState): { committed: string; ime: IMEState } {
+  const isV = key in JUNG_IDX, isC = key in CHO_IDX;
+  if (!isV && !isC) return { committed, ime };
+  if (!ime) return isC ? { committed, ime: { cho: CHO_IDX[key] } } : { committed: committed + makeSyl(11, JUNG_IDX[key]), ime: null };
+  if (ime.jung === undefined) return isC ? { committed: committed + CHO[ime.cho], ime: { cho: CHO_IDX[key] } } : { committed, ime: { cho: ime.cho, jung: JUNG_IDX[key] } };
+  if (isC) {
+    if (ime.jong === undefined) { const ji = JONG_IDX[key]; return ji !== undefined ? { committed, ime: { ...ime, jong: ji } } : { committed: committed + makeSyl(ime.cho, ime.jung), ime: { cho: CHO_IDX[key] } }; }
+    return { committed: committed + makeSyl(ime.cho, ime.jung, ime.jong), ime: { cho: CHO_IDX[key] } };
+  }
+  if (ime.jong !== undefined) { const newCho = JONG_TO_CHO[ime.jong]; return newCho !== undefined ? { committed: committed + makeSyl(ime.cho, ime.jung), ime: { cho: newCho, jung: JUNG_IDX[key] } } : { committed: committed + makeSyl(ime.cho, ime.jung, ime.jong), ime: { cho: 11, jung: JUNG_IDX[key] } }; }
+  return { committed: committed + makeSyl(ime.cho, ime.jung), ime: { cho: 11, jung: JUNG_IDX[key] } };
+}
+function backspace(committed: string, ime: IMEState): { committed: string; ime: IMEState } {
+  if (ime) { if (ime.jong !== undefined) return { committed, ime: { cho: ime.cho, jung: ime.jung } }; if (ime.jung !== undefined) return { committed, ime: { cho: ime.cho } }; return { committed, ime: null }; }
+  return { committed: committed.slice(0, -1), ime: null };
+}
+
+// ─── Constants ───────────────────────────────────────────────────
+const TABS: { id: Tab; label: string }[] = [
+  { id: "info", label: "상세정보" }, { id: "spec", label: "스펙비교" }, { id: "review", label: "리뷰(1,234)" }, { id: "qna", label: "Q&A" },
+];
+const AUTOCOMPLETE = ["에어팟","에어컨","lg전자 에어컨","에어컨 청소","에어프라이어","에브리봇 청소기","삼성전자 에어컨","에어컨 필터"];
+const CATEGORIES = ["에어컨·계절가전 > 에어컨","냉장고·주방가전 > 에어프라이어·튀김기","소모품 > 에어컨소모품"];
+const KB_ROWS = [
+  ["ㅂ","ㅈ","ㄷ","ㄱ","ㅅ","ㅛ","ㅕ","ㅑ","ㅐ","ㅔ"],
+  ["ㅁ","ㄴ","ㅇ","ㄹ","ㅎ","ㅗ","ㅓ","ㅏ","ㅣ"],
+  ["⇧","ㅋ","ㅌ","ㅊ","ㅍ","ㅠ","ㅜ","ㅡ","⌫"],
+];
+
+function Highlight({ text, query }: { text: string; query: string }) {
+  if (!query) return <>{text}</>;
+  const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")})`, "gi");
+  return <>{text.split(re).map((p,i) => re.test(p) ? <span key={i} className="text-[#ee0000] font-medium">{p}</span> : p)}</>;
+}
+
+// ─── 자동완성 ─────────────────────────────────────────────────────
+function InlineAutocomplete({ query, onPick, onSearch }: { query: string; onPick: (s: string) => void; onSearch: () => void }) {
+  const filtered = query ? AUTOCOMPLETE.filter(s => s.includes(query)) : AUTOCOMPLETE;
+  return (
+    <div className="size-full overflow-y-auto bg-white font-['Pretendard',sans-serif]">
+      <div className="py-[16px]">
+        <div className="px-[16px] py-[4px]"><span className="text-[12px] text-[#999] tracking-[0.44px] font-medium">카테고리 바로가기</span></div>
+        {CATEGORIES.map((s, i) => {
+          const [left, right] = s.split(" > ");
+          return (
+            <button key={i} onClick={() => { onPick(right); onSearch(); }} className="w-full flex items-center justify-between px-[16px] py-[10px]">
+              <span className="text-[14px] text-[#222]">{left}{" > "}<Highlight text={right} query={query} /></span>
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M4 2L7 5.5L4 9" stroke="#767676" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+          );
+        })}
+      </div>
+      <div className="bg-[#f7f7f7] h-[4px]" />
+      <div>
+        <div className="px-[16px] py-[4px] pt-[16px]"><span className="text-[12px] text-[#999] tracking-[0.44px] font-medium">자동완성</span></div>
+        <div className="grid grid-cols-2">
+          {filtered.map((s, i) => (
+            <button key={i} onClick={() => { onPick(s); onSearch(); }} className="flex items-center justify-between px-[16px] py-[9px] h-[38px]">
+              <span className="text-[14px] text-[#222]"><Highlight text={s} query={query} /></span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L8 8L12 12" stroke="#CDCDCD" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2"/><path d="M5 4L5 12" stroke="#CDCDCD" strokeLinecap="round" strokeWidth="1.2"/></svg>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── 검색 메인 홈 (간소화) ────────────────────────────────────────
+function SearchHomeBody({ onDetail }: { onDetail: () => void }) {
+  return (
+    <div className="flex-1 overflow-y-auto overflow-x-hidden bg-white">
+      <div className="px-[16px] py-[20px]">
+        <p className="text-[14px] font-bold text-[#1a1a1a] mb-[12px]">최근 검색어</p>
+        <div className="flex flex-wrap gap-[8px] mb-[20px]">
+          {["에어컨","삼성냉장고","LG세탁기","공기청정기"].map(kw => (
+            <button key={kw} className="border border-[#e5e5e5] rounded-[99px] px-[12px] py-[6px] text-[13px] text-[#333]">{kw}</button>
+          ))}
+        </div>
+        <p className="text-[14px] font-bold text-[#1a1a1a] mb-[12px]">추천 상품</p>
+        <div className="grid grid-cols-2 gap-[12px]">
+          {[
+            { name: "LG 휘센 에어컨 23평", price: "1,899,000", badge: "최대 20%", color: "#e8f4ff" },
+            { name: "삼성 비스포크 냉장고", price: "2,590,000", badge: "특별할인", color: "#fff0e8" },
+            { name: "LG 오브제 세탁기 25kg", price: "1,290,000", badge: "L포인트↑", color: "#f0f8e8" },
+            { name: "플럭스 벽걸이 에어컨 8평", price: "549,000", badge: "15%↓", color: "#f5f0ff" },
+          ].map(({ name, price, badge, color }) => (
+            <button key={name} className="text-left" onClick={onDetail}>
+              <div className="w-full aspect-square rounded-[10px] flex items-center justify-center mb-2 relative" style={{ background: color }}>
+                <svg width="60" height="60" viewBox="0 0 60 60" fill="none"><rect x="8" y="15" width="44" height="30" rx="3" fill="#ddd"/><rect x="12" y="19" width="36" height="22" rx="2" fill="#1a1a1a"/><circle cx="30" cy="30" r="8" stroke="#4a9eff" strokeWidth="1.5"/><rect x="20" y="45" width="20" height="3" rx="1.5" fill="#ddd"/></svg>
+                <span className="absolute top-2 left-2 bg-[#da231c] text-white text-[10px] px-[6px] py-[2px] rounded-full font-semibold">{badge}</span>
+              </div>
+              <p className="text-[12px] text-[#333] leading-tight">{name}</p>
+              <p className="text-[13px] font-bold text-[#1a1a1a] mt-1">{price}원</p>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── 검색결과 없음 ────────────────────────────────────────────────
+function NoResultScreen({ query, onViewSuggested }: { query: string; onViewSuggested: () => void }) {
+  return (
+    <div className="size-full overflow-y-auto bg-white font-['Pretendard',sans-serif]">
+      <div className="px-[16px] pt-[20px]">
+        <div className="rounded-[14px] bg-[#f7f7f7] flex flex-col items-center gap-[12px] px-[18px] py-[20px]">
+          <div className="flex items-center justify-center gap-[10px] w-full">
+            <div className="shrink-0 w-[36px] h-[36px] rounded-full bg-[rgba(238,238,238,0.93)] flex items-center justify-center">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#000" strokeWidth="1.5"/><path d="M12.6 12.6L16.2 16.2" stroke="#000" strokeWidth="1.5" strokeLinecap="round"/></svg>
+            </div>
+            <div className="flex flex-col items-start">
+              <p className="text-[14px] text-[#6b7280]">&quot;{query}&quot; 검색 결과가 없어요</p>
+              <div className="flex items-center gap-[6px] pt-[4px]">
+                <span className="text-[13px] text-[#6b7280]">혹시</span>
+                <span className="bg-[#eeeeee] text-[#1a1a1a] text-[13px] font-semibold px-[6px] py-[2px] rounded-[4px]">&quot;에어컨&quot;</span>
+                <span className="text-[13px] text-[#6b7280]">을 찾으셨나요?</span>
+              </div>
+            </div>
+          </div>
+          <button onClick={onViewSuggested} className="w-full bg-[#eef3ff] border border-[#c5d4fd] rounded-[12px] px-[16px] py-[12px] flex items-center justify-center gap-[8px]">
+            <span className="text-[14px] font-bold text-[#486ef6]">&quot;에어컨&quot; 결과 보기</span>
+            <svg width="7" height="11" viewBox="0 0 7 11" fill="none"><path d="M1 1L6 5.5L1 10" stroke="#486EF6" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+      <div className="px-[16px] pt-[16px] pb-[8px]">
+        <p className="text-[14px] font-bold text-[#1a1a1a] mb-[8px]">보다 정확한 맞춤 검색이 필요하다면?</p>
+        <button className="w-full flex items-center gap-[4px] bg-[#edf6fd] border border-[#edf6fd] rounded-[8px] px-[16px] py-[8px]">
+          <span className="text-[14px] leading-none shrink-0">💡</span>
+          <span className="flex-1 text-left text-[13px] font-bold text-[#047bdb]">하이마트 AI 하비(HAVI)로 똑똑하게 검색해보기</span>
+          <svg width="6" height="10" viewBox="0 0 6 10" fill="none" className="shrink-0"><path d="M1 1L5 5L1 9" stroke="#047BDB" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </button>
+      </div>
+      <div className="px-[16px] pt-[16px]">
+        <p className="text-[14px] font-bold text-[#1a1a1a] mb-[12px]">추천 검색어</p>
+        <div className="flex flex-wrap gap-[8px]">
+          {AUTOCOMPLETE.map(kw => (
+            <button key={kw} className="border border-[#e5e5e5] rounded-[99px] px-[12px] py-[6px] text-[13px] text-[#333]">{kw}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── 검색결과 ─────────────────────────────────────────────────────
+function ResultsScreen({ query, onDetail }: { query: string; onDetail: () => void }) {
+  const products = [
+    { name: "[5년무상AS] 26.0㎡ 인버터 벽걸이 에어컨 PLX-RAC0825CHWH", price: "549,000", originalPrice: "649,000", discount: "15%", color: "#f0f8ff" },
+    { name: "캐리어 인버터 벽걸이에어컨 EARB-0081FAWSD (26.0㎡)", price: "616,000", originalPrice: "680,000", discount: "9%", color: "#f0fff4" },
+    { name: "LG 휘센 스탠드 에어컨 23평 FQ23VDKBA2", price: "1,499,000", originalPrice: "1,899,000", discount: "21%", color: "#fff0f0" },
+    { name: "삼성 비스포크 무풍에어컨 갤러리 AF17CB9500GH", price: "2,090,000", originalPrice: "2,590,000", discount: "19%", color: "#f5f0ff" },
+  ];
+
+  return (
+    <div className="size-full overflow-y-auto bg-white font-['Pretendard',sans-serif]">
+      <div className="px-[16px] py-[12px] flex items-center justify-between border-b border-[#f0f0f0]">
+        <span className="text-[13px] text-[#666]">&quot;{query}&quot; 검색결과 <span className="font-bold text-[#1a1a1a]">24</span>개</span>
+        <div className="flex items-center gap-[8px]">
+          <button className="text-[13px] text-[#666]">필터</button>
+          <button className="text-[13px] text-[#666] border border-[#e5e5e5] rounded-[4px] px-[8px] py-[4px]">인기순 ▾</button>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-[1px] bg-[#f0f0f0]">
+        {products.map((p, i) => (
+          <button key={i} onClick={onDetail} className="bg-white p-[12px] text-left">
+            <div className="w-full aspect-square rounded-[8px] mb-[8px] relative flex items-center justify-center" style={{ background: p.color }}>
+              <svg width="60" height="60" viewBox="0 0 60 60" fill="none"><rect x="8" y="15" width="44" height="30" rx="3" fill="#ddd"/><rect x="12" y="19" width="36" height="22" rx="2" fill="#1a1a1a"/><circle cx="30" cy="30" r="8" stroke="#4a9eff" strokeWidth="1.5"/><rect x="20" y="45" width="20" height="3" rx="1.5" fill="#ddd"/></svg>
+              <span className="absolute top-2 left-2 bg-[#da231c] text-white text-[10px] px-[6px] py-[2px] rounded-full font-semibold">{p.discount}</span>
+            </div>
+            <p className="text-[12px] text-[#333] leading-tight line-clamp-2 mb-[4px]">{p.name}</p>
+            <p className="text-[11px] text-[#999] line-through">{p.originalPrice}원</p>
+            <p className="text-[14px] font-bold text-[#1a1a1a]">{p.price}원</p>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── 상품 상세 ────────────────────────────────────────────────────
+const Divider = () => <div className="h-[8px] bg-[#e8e8e8]"/>;
+
+function DetailScreen({ onBack, onBuy, onCart }: { onBack: () => void; onBuy: () => void; onCart: () => void }) {
+  const [activeTab, setActiveTab] = useState<Tab>("info");
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const sectionRefs = { info: useRef<HTMLDivElement>(null), spec: useRef<HTMLDivElement>(null), review: useRef<HTMLDivElement>(null), qna: useRef<HTMLDivElement>(null) };
+  const navRef = useRef<HTMLDivElement>(null);
+  const [navH, setNavH] = useState(0);
+  useLayoutEffect(() => { if (navRef.current) setNavH(navRef.current.offsetHeight); }, []);
+
+  const scrollTo = (tab: Tab) => {
+    setActiveTab(tab);
+    const el = sectionRefs[tab].current;
+    if (el && scrollRef.current) {
+      const off = el.getBoundingClientRect().top - scrollRef.current.getBoundingClientRect().top + scrollRef.current.scrollTop - navH;
+      scrollRef.current.scrollTo({ top: off, behavior: "smooth" });
+    }
+  };
+
+  return (
+    <div className="size-full flex flex-col font-['Pretendard',sans-serif]">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto min-h-0">
+        <div ref={navRef} className="sticky top-0 z-20 bg-white">
+          <div className="flex items-center justify-between px-[12px] py-[16px]">
+            <button onClick={onBack} className="flex items-center justify-center w-[20px] h-[20px]">
+              <svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M9 1L1 9L5 13L9 17" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+            <div className="flex items-center gap-[10px]">
+              <button className="p-[4px]">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 19L4 12C2.5 10 2.5 7 4.5 5.5C6.5 4 9 4.5 11 7C13 4.5 15.5 4 17.5 5.5C19.5 7 19.5 10 18 12L11 19Z" stroke="#888" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+              <button className="p-[4px]" onClick={onCart}>
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 3H5L7.5 14H16.5L19 6H7" stroke="#1A1A1A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="9" cy="17.5" r="1.5" fill="#1A1A1A"/><circle cx="15" cy="17.5" r="1.5" fill="#1A1A1A"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full aspect-square bg-[#f5f6f7] relative">
+          <Image src={imgProductMain} alt="PLUX 에어컨" className="w-full h-full object-contain" fill />
+          <div className="absolute left-[16px] bottom-[17px] bg-[rgba(0,0,0,0.62)] rounded-[999px] flex items-center gap-[5px] px-[11px] py-[6px]">
+            <span className="w-[6px] h-[6px] rounded-full bg-[#ff4d4d] shrink-0"/>
+            <span className="text-[12px] font-medium text-white tracking-[-0.2px]">지금 48명이 보는 중</span>
+          </div>
+          <div className="absolute right-[15.62px] bottom-[17px] bg-[rgba(0,0,0,0.55)] rounded-[999px] px-[11px] py-[5px]">
+            <span className="text-[12px] font-semibold text-white">1/5</span>
+          </div>
+        </div>
+
+        <div className="px-[20px] py-[16px] bg-white">
+          <h1 className="text-[18px] font-semibold text-[#1a1a1a] tracking-[-0.2px] leading-[1.4] mb-[4px]">
+            [5년무상AS] 26.0㎡ 인버터 벽걸이 에어컨 PLX-RAC0825CHWH [전국기본설치비 포함]
+          </h1>
+          <p className="text-[13px] text-[#808080]">모델명 PLX-RAC0825CHWH</p>
+          <div className="flex items-center gap-[6px] mt-[8px]">
+            <span className="text-[13px] text-[#ff1344]">★★★★<span className="text-[#e5e5e5]">★</span></span>
+            <span className="text-[13px] font-bold text-[#1a1a1a]">4.9</span>
+            <span className="text-[13px] text-[#767676]">(리뷰 14)</span>
+            <div className="ml-auto"><span className="bg-[#ffecec] text-[#ff1344] text-[12px] font-medium px-[10px] py-[5px] rounded-[999px]">전문가 상담 가능 ›</span></div>
+          </div>
+        </div>
+
+        <div className="px-[20px] py-[16px] bg-white mt-[8px]">
+          <p className="text-[13px] text-[#aeaeb2] line-through mb-[2px]">619,000원</p>
+          <div className="flex items-baseline gap-[8px] mb-[16px]">
+            <span className="text-[24px] font-bold text-[#ff1344]">15%</span>
+            <span className="text-[26px] font-extrabold text-[#1a1a1a]">549,000원</span>
+          </div>
+          <div className="border border-[#ff9797] rounded-[10px] flex items-center justify-between px-[15px] py-[13px]">
+            <span className="text-[13px] font-semibold text-[#1a1a1a]">최대 혜택가</span>
+            <div className="flex items-center gap-[10px]">
+              <span className="text-[17px] font-extrabold text-[#ff1344]">500,570원</span>
+              <span className="bg-[#ffecec] text-[#ff1344] text-[12px] font-medium px-[10px] py-[5px] rounded-[999px]">혜택보기 ›</span>
+            </div>
+          </div>
+        </div>
+
+        <Divider/>
+
+        <div className="px-[20px] py-[16px] flex flex-col gap-[12px] bg-white">
+          <div className="flex items-center gap-[8px]">
+            <span className="text-[17px] font-bold text-[#1a1a1a]">배송 · 혜택</span>
+          </div>
+          <div className="flex items-start gap-[14px] py-[4px]">
+            <span className="text-[14px] font-medium text-[#222] w-[52px] shrink-0">배송</span>
+            <span className="text-[14px] font-semibold text-[#1a1a1a]">하이마트 직접 배송 · 무료배송</span>
+          </div>
+        </div>
+
+        <Divider/>
+
+        <div className="relative">
+          <div className="sticky z-10 bg-white border-b border-[#eee] flex" style={{ top: navH }}>
+            {TABS.map(tab => (
+              <button key={tab.id} onClick={() => scrollTo(tab.id)} className="flex-1 py-[14px] text-[15px] relative">
+                <span className={activeTab===tab.id ? "font-semibold text-[#da231c]" : "font-medium text-[#666]"}>{tab.label}</span>
+                {activeTab===tab.id && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#da231c]"/>}
+              </button>
+            ))}
+          </div>
+
+          <div ref={sectionRefs.info} className="bg-white">
+            <div className="px-[20px] py-[16px]"><h3 className="text-[17px] font-bold text-[#1a1a1a] mb-[12px]">상세정보</h3></div>
+            <div className="relative">
+              <Image src={imgDetailImage} alt="상품 상세" className="w-full object-cover" width={390} height={600} />
+              <div className="absolute left-0 right-0 bottom-0 px-[20px] py-[16px]">
+                <button className="w-full h-[48px] bg-white border border-[#666] rounded-[10px] flex items-center justify-center">
+                  <span className="text-[14px] font-semibold text-[#666]">상품상세 더보기 ▾</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <Divider/>
+
+          <div ref={sectionRefs.spec} className="bg-white px-[20px] py-[16px]">
+            <h3 className="text-[17px] font-bold text-[#1a1a1a] mb-[16px]">알고 구매하면 좋은 스펙</h3>
+            {[["종류","벽걸이형"],["냉방면적","26.0㎡ (8평)"],["인버터여부","인버터"],["냉매종류","R410A"],["냉방능력","2.80kW"],["소비전력","870W"],["에너지효율","1등급"],["색상","화이트"]].map(([label, value], i) => (
+              <div key={i} className="flex items-center justify-between py-[10px] border-b border-[#f0f0f0] last:border-0">
+                <span className="text-[14px] text-[#1a1a1a]">{label}</span>
+                <span className="text-[14px] font-bold text-[#1a1a1a]">{value}</span>
+              </div>
+            ))}
+          </div>
+
+          <Divider/>
+
+          <div ref={sectionRefs.review} className="bg-white px-[20px] py-[16px]">
+            <h3 className="text-[17px] font-bold text-[#1a1a1a] mb-[12px]">상품 리뷰</h3>
+            <div className="flex items-center gap-[12px] mb-[12px]">
+              <span className="text-[18px] text-[#da231c]">★★★★★</span>
+              <span className="text-[24px] font-bold text-[#da231c]">4.2 (1,234)</span>
+            </div>
+            <div className="flex gap-[10px] overflow-x-auto pb-[4px] mb-[4px]">
+              <div className="shrink-0 size-[74px] rounded-[8px] overflow-hidden bg-[#f5f6f7] relative">
+                <Image src={imgReviewThumbnail} alt="리뷰 사진" className="object-cover" fill />
+              </div>
+            </div>
+            {[{ name:"김철수", rating:5, date:"2024.05.12", content:"설치도 빠르고 냉방 효과가 정말 좋아요!" },{ name:"이영희", rating:5, date:"2024.04.28", content:"가성비 최고! 조용하고 전기세도 많이 안 나옵니다." }].map((r,i) => (
+              <div key={i} className="py-[14px] border-b border-[#f0f0f0] last:border-0">
+                <div className="flex items-center gap-[8px] mb-[6px]">
+                  <div className="w-[32px] h-[32px] rounded-full bg-[#e5e5e5] flex items-center justify-center text-[14px] font-bold text-[#767676]">{r.name[0]}</div>
+                  <div><p className="text-[13px] font-semibold text-[#1a1a1a]">{r.name}</p><p className="text-[11px] text-[#999]">{r.date}</p></div>
+                  <span className="ml-auto text-[12px] text-[#ff1344]">{"★".repeat(r.rating)}</span>
+                </div>
+                <p className="text-[13px] text-[#444] leading-[1.6]">{r.content}</p>
+              </div>
+            ))}
+          </div>
+
+          <Divider/>
+
+          <div ref={sectionRefs.qna} className="bg-white px-[20px] py-[16px]">
+            <h3 className="text-[17px] font-bold text-[#1a1a1a] mb-[16px]">상품 문의 (42)</h3>
+            {[{ q:"설치비 포함인가요?", a:"네, 전국기본설치비가 포함된 상품입니다." },{ q:"배송 기간은?", a:"평균 2-3일 내 배송 완료됩니다." }].map((item,i) => (
+              <div key={i} className="py-[14px] border-b border-[#f0f0f0] last:border-0">
+                <div className="flex items-start gap-[8px] mb-[8px]">
+                  <span className="shrink-0 w-[20px] h-[20px] rounded-full bg-[#1a1a1a] text-white text-[11px] font-bold flex items-center justify-center">Q</span>
+                  <p className="text-[14px] font-semibold text-[#1a1a1a]">{item.q}</p>
+                </div>
+                <div className="flex items-start gap-[8px]">
+                  <span className="shrink-0 w-[20px] h-[20px] rounded-full bg-[#ff1344] text-white text-[11px] font-bold flex items-center justify-center">A</span>
+                  <p className="text-[13px] text-[#444] leading-[1.6]">{item.a}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <Divider/>
+        <div className="h-[100px]" />
+      </div>
+
+      <div className="shrink-0 bg-white border-t border-[#e5e5e5] z-20">
+        <div className="flex items-center gap-[6px] px-[14px] pt-[11px] pb-[10px]">
+          <button onClick={onCart} className="w-[114px] h-[48px] rounded-[8px] border border-[#1a1a1a] flex items-center justify-center shrink-0">
+            <span className="text-[15px] font-bold text-[#1a1a1a]">장바구니</span>
+          </button>
+          <button onClick={onBuy} className="flex-1 h-[48px] rounded-[8px] bg-[#da231c] flex items-center justify-center">
+            <span className="text-[15px] font-bold text-white">바로구매</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── 검색바 ──────────────────────────────────────────────────────
+function SearchBar({ query, displayQuery, focused, onFocus, onKey, onBackspace, onSearch, onClear, onBack }: {
+  query: string; displayQuery: string; focused: boolean;
+  onFocus: () => void; onKey: (k: string) => void; onBackspace: () => void;
+  onSearch: () => void; onClear: () => void; onBack: () => void;
+}) {
+  return (
+    <div className="shrink-0 flex items-center px-[12px] py-[10px] gap-[8px] border-b border-[#f0f0f0] bg-white">
+      <button onClick={onBack} className="p-[4px]">
+        <svg width="9" height="16" viewBox="0 0 9 16" fill="none"><path d="M8 1L1 8L8 15" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </button>
+      <button onClick={onFocus} className="flex-1 h-[40px] bg-[#f5f6f7] rounded-[8px] flex items-center px-[12px] gap-[8px]">
+        <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><circle cx="7.5" cy="7.5" r="5.5" stroke="#888" strokeWidth="1.5"/><path d="M12 12L15 15" stroke="#888" strokeWidth="1.5" strokeLinecap="round"/></svg>
+        <span className={`flex-1 text-[14px] text-left ${displayQuery ? "text-[#1a1a1a]" : "text-[#aaa]"}`}>
+          {displayQuery || "검색어를 입력해주세요"}
+        </span>
+        {displayQuery && (
+          <button onClick={(e) => { e.stopPropagation(); onClear(); }} className="text-[#999]">✕</button>
+        )}
+      </button>
+      <button onClick={onSearch} className="text-[14px] font-medium text-[#1a1a1a]">검색</button>
+    </div>
+  );
+}
+
+// ─── 한글 키보드 ─────────────────────────────────────────────────
+function HangeulKeyboard({ onKey, onBackspace, onSearch }: { onKey: (k: string) => void; onBackspace: () => void; onSearch: () => void }) {
+  return (
+    <div className="shrink-0 bg-[#d1d5db] pt-[8px] pb-[4px] px-[3px]">
+      {KB_ROWS.map((row, ri) => (
+        <div key={ri} className={`flex justify-center gap-[6px] mb-[8px] ${ri === 1 ? "px-[14px]" : ""}`}>
+          {row.map((key) => {
+            if (key === "⌫") return (
+              <button key={key} onClick={onBackspace} className="flex-1 max-w-[42px] h-[42px] rounded-[5px] bg-[#aab4c0] flex items-center justify-center shadow-[0_1px_0_rgba(0,0,0,0.3)]">
+                <svg width="18" height="14" viewBox="0 0 18 14" fill="none"><path d="M7 1L1 7L7 13M1 7H17" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+            );
+            if (key === "⇧") return (
+              <button key={key} className="flex-1 max-w-[42px] h-[42px] rounded-[5px] bg-[#aab4c0] flex items-center justify-center shadow-[0_1px_0_rgba(0,0,0,0.3)]">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L2 8H5V14H11V8H14L8 2Z" fill="#1a1a1a"/></svg>
+              </button>
+            );
+            return (
+              <button key={key} onClick={() => onKey(key)} className="flex-1 max-w-[42px] h-[42px] rounded-[5px] bg-white text-[18px] text-[#1a1a1a] shadow-[0_1px_0_rgba(0,0,0,0.3)] active:bg-[#e5e5e5]">
+                {key}
+              </button>
+            );
+          })}
+        </div>
+      ))}
+      <div className="flex gap-[6px] px-[3px] mb-[4px]">
+        <button className="w-[86px] h-[42px] rounded-[5px] bg-[#aab4c0] text-[14px] text-[#1a1a1a] shadow-[0_1px_0_rgba(0,0,0,0.3)]">!@#</button>
+        <button onClick={() => onKey(" ")} className="flex-1 h-[42px] rounded-[5px] bg-white shadow-[0_1px_0_rgba(0,0,0,0.3)]" />
+        <button onClick={onSearch} className="w-[86px] h-[42px] rounded-[5px] bg-[#aab4c0] text-[14px] text-[#1a1a1a] shadow-[0_1px_0_rgba(0,0,0,0.3)]">검색</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── SearchPage (루트) ────────────────────────────────────────────
+export default function SearchPage({ onHome, onCart }: { onHome: () => void; onCart: () => void }) {
+  const [screen, setScreen] = useState<Screen>("main");
+  const [committed, setCommitted] = useState("");
+  const [ime, setIme] = useState<IMEState>(null);
+  const [finalQuery, setFinalQuery] = useState("");
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+  const displayQuery = committed + renderIME(ime);
+
+  const handleKey = (key: string) => {
+    if (key === " ") { setCommitted(prev => prev + renderIME(ime) + " "); setIme(null); return; }
+    const result = pressKey(key, committed, ime);
+    setCommitted(result.committed); setIme(result.ime);
+  };
+  const handleBackspace = () => { const r = backspace(committed, ime); setCommitted(r.committed); setIme(r.ime); };
+  const handleSearch = () => {
+    const q = displayQuery.trim();
+    if (!q) return;
+    setFinalQuery(q);
+    setKeyboardOpen(false);
+    setScreen(q.includes("에어") ? "results" : "noresult");
+  };
+  const handlePick = (s: string) => { setCommitted(s); setIme(null); };
+  const handleClear = () => { setCommitted(""); setIme(null); };
+
+  const showAutocomplete = keyboardOpen && displayQuery.length > 0;
+  const showKeyboard = keyboardOpen;
+
+  if (screen === "detail") {
+    return (
+      <div className="size-full">
+        <DetailScreen onBack={() => setScreen("results")} onBuy={onCart} onCart={onCart} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="size-full flex flex-col bg-white font-['Pretendard',sans-serif] overflow-hidden">
+      {/* 상태바 */}
+      <div className="flex items-center justify-between px-3 h-[30px] shrink-0 bg-white">
+        <span className="text-[13px] font-semibold text-[#1a1a1a]">9:27</span>
+        <div className="flex items-center gap-1">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="1" fill="#1a1a1a"/><rect x="5" y="2" width="3" height="10" rx="1" fill="#1a1a1a"/><rect x="10" y="0" width="3" height="12" rx="1" fill="#1a1a1a"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#1a1a1a" opacity="0.3"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><circle cx="8" cy="10" r="2" fill="#1a1a1a"/></svg>
+          <div className="border border-[#1a1a1a] rounded-[3px] w-[22px] h-[12px] p-[1.5px]"><div className="bg-[#1a1a1a] rounded-[1.5px] h-full w-full"/></div>
+        </div>
+      </div>
+
+      <SearchBar
+        query={committed} displayQuery={displayQuery} focused={keyboardOpen}
+        onFocus={() => setKeyboardOpen(true)}
+        onKey={handleKey} onBackspace={handleBackspace} onSearch={handleSearch}
+        onClear={handleClear}
+        onBack={() => { if (screen !== "main") { setScreen("main"); setCommitted(""); setIme(null); } else { onHome(); } }}
+      />
+
+      <div className="flex-1 min-h-0 overflow-hidden">
+        {showAutocomplete ? (
+          <InlineAutocomplete query={displayQuery} onPick={handlePick} onSearch={handleSearch} />
+        ) : screen === "main" ? (
+          <SearchHomeBody onDetail={() => setScreen("detail")} />
+        ) : screen === "results" ? (
+          <ResultsScreen query={finalQuery} onDetail={() => setScreen("detail")} />
+        ) : (
+          <NoResultScreen query={finalQuery} onViewSuggested={() => { setFinalQuery("에어컨"); setScreen("results"); }} />
+        )}
+      </div>
+
+      {showKeyboard && (
+        <HangeulKeyboard onKey={handleKey} onBackspace={handleBackspace} onSearch={handleSearch} />
+      )}
+    </div>
+  );
+}
