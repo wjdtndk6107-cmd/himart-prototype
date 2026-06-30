@@ -1,0 +1,224 @@
+/* ============================================================
+   login.css
+   LoginPage 전용 스타일
+   ============================================================ */
+
+/* ── 로그인 입력 폼 ─────────────────────────────────────────── */
+.login-input {
+  width: 100%;
+  height: 52px;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+  padding: 0 17px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  background: transparent;
+  color: #1a1a1a;
+}
+
+.login-input::placeholder {
+  color: #c0c0c0;
+}
+
+.login-input:focus {
+  border-color: #1a1a1a;
+}
+
+/* ── 로그인 버튼 ────────────────────────────────────────────── */
+.login-btn {
+  width: 100%;
+  height: 52px;
+  border-radius: 8px;
+  background: #da231c;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: opacity 0.15s;
+}
+
+.login-btn--active {
+  opacity: 1;
+}
+
+/* ── 자동로그인 / 링크 영역 ─────────────────────────────────── */
+.login-utils {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px 8px 0;
+}
+
+.login-utils__links {
+  font-size: 12px;
+  color: #999999;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.login-utils__sep {
+  color: #eaeaea;
+}
+
+/* ── 간편 로그인 소셜 버튼 ──────────────────────────────────── */
+.login-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 12px 0;
+}
+
+.login-social__btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-social__btn--kakao  { background: #FEE500; }
+.login-social__btn--naver  { background: #03C75A; }
+.login-social__btn--apple  { background: #1e1e1e; }
+
+/* ── 섹션 구분선 ────────────────────────────────────────────── */
+.login-separator {
+  border-bottom: 2px solid rgba(229, 229, 229, 0.5);
+}
+
+/* ── 약관 동의 화면 ─────────────────────────────────────────── */
+.terms-title {
+  font-size: 18px;
+  color: #1a1a1a;
+  line-height: 1.4;
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+
+.terms-title strong {
+  font-weight: 700;
+}
+
+.terms-all-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.terms-group-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.terms-required-tag {
+  font-size: 13px;
+  color: #da231c;
+}
+
+.terms-optional-tag {
+  font-size: 13px;
+  color: #999999;
+}
+
+.terms-sub-list {
+  margin-left: 16px;
+  background: #fafafa;
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.terms-sub-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 13px;
+  color: #333333;
+}
+
+/* ── 팝업 공통 ──────────────────────────────────────────────── */
+.himart-popup-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.himart-popup {
+  background: #ffffff;
+  border-radius: 8px;
+  width: 320px;
+  overflow: hidden;
+}
+
+.himart-popup__body {
+  padding: 24px;
+  text-align: center;
+}
+
+.himart-popup__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.himart-popup__desc {
+  font-size: 14px;
+  color: #444444;
+  line-height: 1.6;
+}
+
+.himart-popup__footer {
+  border-top: 1px solid #eeeeee;
+  display: flex;
+}
+
+.himart-popup__footer-btn {
+  flex: 1;
+  height: 50px;
+  font-size: 15px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+.himart-popup__footer-btn--cancel  { background: #999999; }
+.himart-popup__footer-btn--confirm { background: #da231c; }

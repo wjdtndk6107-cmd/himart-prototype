@@ -1,0 +1,271 @@
+/* ============================================================
+   home.css
+   HomePage 전용 스타일
+   ============================================================ */
+
+/* ── 홈 헤더 ────────────────────────────────────────────────── */
+.home-header {
+  flex-shrink: 0;
+  height: 44px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.home-header__location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.home-header__tab-group {
+  display: flex;
+  align-items: center;
+  width: 116px;
+  height: 33px;
+  background: #fafafa;
+  border-radius: 17px;
+  box-shadow: inset 0 0 0 1px #e6e6e6;
+  margin-left: 8px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.home-header__tab-item {
+  flex: 1;
+  height: 100%;
+  font-size: 13px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #797B7D;
+  font-weight: 500;
+}
+
+.home-header__tab-item--active {
+  background: #111111;
+  border-radius: 17px;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* ── 검색바 ─────────────────────────────────────────────────── */
+.home-searchbar {
+  flex-shrink: 0;
+  margin: 8px 12px;
+  height: 46px;
+  background: #ffffff;
+  border: 1px solid #585858;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px 0 16px;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.home-searchbar__placeholder {
+  flex: 1;
+  font-size: 14px;
+  color: #959595;
+  text-align: left;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ── 메인 배너 ──────────────────────────────────────────────── */
+.home-banner {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.home-banner__counter {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* ── 카테고리 가로 스크롤 ───────────────────────────────────── */
+.home-categories {
+  display: flex;
+  align-items: flex-start;
+  padding: 16px 12px;
+  overflow-x: auto;
+  gap: 0;
+}
+
+.home-category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  width: 64px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.home-category-item__icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.home-category-item__label {
+  font-size: 10px;
+  color: #555555;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* ── 3단 배너 ───────────────────────────────────────────────── */
+.home-triple-banner {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+}
+
+.home-triple-banner__card {
+  flex: 1;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: left;
+  border: none;
+  cursor: pointer;
+}
+
+.home-triple-banner__badge {
+  font-size: 10px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.home-triple-banner__title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.3;
+}
+
+/* ── 오늘의 특가 ────────────────────────────────────────────── */
+.home-todaydeal {
+  padding: 16px 12px 24px;
+}
+
+.home-todaydeal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.home-todaydeal__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.home-todaydeal__more {
+  font-size: 12px;
+  color: #999999;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.home-todaydeal__list {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.home-product-card {
+  flex-shrink: 0;
+  width: 130px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.home-product-card__thumb {
+  width: 130px;
+  height: 130px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-product-card__name {
+  font-size: 12px;
+  color: #333333;
+  line-height: 1.4;
+}
+
+.home-product-card__price {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-top: 4px;
+}
+
+/* ── 바텀 탭바 ──────────────────────────────────────────────── */
+.home-tabbar {
+  flex-shrink: 0;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  background: #ffffff;
+}
+
+.home-tabbar__item {
+  flex: 1;
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.home-tabbar__label {
+  font-size: 10px;
+  color: #999999;
+}
+
+.home-tabbar__label--active {
+  color: #da231c;
+  font-weight: 700;
+}
