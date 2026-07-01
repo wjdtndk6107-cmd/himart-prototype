@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { svgOrder } from "../components/svg-paths";
 import DeliveryDatePicker from "../components/DeliveryDatePicker";
 import PaymentDropdown from "../components/PaymentDropdown";
 import imgProductThumb from "../img/product-thumb.png";
@@ -52,7 +51,7 @@ export default function OrderPage({ onComplete, onBack }: Props) {
       <div className="flex items-center justify-between px-3 h-[30px] shrink-0 bg-white">
         <span className="text-[13px] font-semibold text-[#1a1a1a]">9:27</span>
         <div className="flex items-center gap-1">
-          {svgOrder.wifi && <SvgIcon d={svgOrder.wifi} size={18} viewBox="0 0 24 24"/>}
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><circle cx="8" cy="10" r="2" fill="#1a1a1a"/></svg>
           <div className="border border-[#1a1a1a] rounded-[3px] w-[22px] h-[12px] p-[1.5px]"><div className="bg-[#1a1a1a] rounded-[1.5px] h-full w-full"/></div>
         </div>
       </div>
@@ -73,12 +72,12 @@ export default function OrderPage({ onComplete, onBack }: Props) {
           <div className="flex items-center justify-between mb-[12px]">
             <p className="text-[15px] font-bold text-[#1a1a1a]">배송지</p>
             <button className="flex items-center gap-[4px]">
-              {svgOrder.edit && <SvgIcon d={svgOrder.edit} size={14} viewBox="0 0 24 24" />}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 20H8L18 10L14 6L4 16V20Z" stroke="#999" strokeWidth="1.5" strokeLinejoin="round"/><path d="M14 6L18 10" stroke="#999" strokeWidth="1.5"/></svg>
               <span className="text-[13px] text-[#999]">변경</span>
             </button>
           </div>
           <div className="flex items-start gap-[8px]">
-            {svgOrder.location && <SvgIcon d={svgOrder.location} size={18} viewBox="0 0 24 24" color="#da231c"/>}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.7 2 6 4.7 6 8C6 12.5 12 20 12 20C12 20 18 12.5 18 8C18 4.7 15.3 2 12 2Z" stroke="#da231c" strokeWidth="1.5"/><circle cx="12" cy="8" r="2.5" stroke="#da231c" strokeWidth="1.5"/></svg>
             <div>
               <p className="text-[14px] font-semibold text-[#1a1a1a]">김철수 (010-1234-5678)</p>
               <p className="text-[13px] text-[#555] mt-[2px]">서울특별시 강남구 테헤란로 123 하이마트빌딩 101호</p>
@@ -92,7 +91,7 @@ export default function OrderPage({ onComplete, onBack }: Props) {
           <div className="flex items-center justify-between">
             <p className="text-[15px] font-bold text-[#1a1a1a]">희망배송일</p>
             <button className="flex items-center gap-[4px]" onClick={() => setShowDatePicker(true)}>
-              {svgOrder.calendar && <SvgIcon d={svgOrder.calendar} size={16} viewBox="0 0 24 24" />}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#888" strokeWidth="1.5"/><path d="M3 9H21M8 2V6M16 2V6" stroke="#888" strokeWidth="1.5" strokeLinecap="round"/></svg>
               <span className="text-[13px] text-[#da231c]">{deliveryDate ? formatDate(deliveryDate) : "날짜 선택"}</span>
             </button>
           </div>
@@ -145,7 +144,7 @@ export default function OrderPage({ onComplete, onBack }: Props) {
             <button onClick={() => setShowPaymentDropdown(!showPaymentDropdown)}
               className="w-full flex items-center justify-between border border-[#e0e0e0] rounded-[8px] px-[14px] py-[12px]">
               <span className="text-[14px] text-[#1a1a1a]">{selectedPayment}</span>
-              {svgOrder.chevron && <SvgIcon d={svgOrder.chevron} size={14} viewBox="0 0 24 24" />}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
             {showPaymentDropdown && (
               <div className="absolute left-0 right-0 top-full z-10 mt-[4px]">
@@ -166,7 +165,7 @@ export default function OrderPage({ onComplete, onBack }: Props) {
                 <button onClick={() => { setShowCardDropdown(!showCardDropdown); setShowInstallDropdown(false); }}
                   className="w-full flex items-center justify-between border border-[#e0e0e0] rounded-[8px] px-[14px] py-[12px]">
                   <span className="text-[14px] text-[#1a1a1a]">{selectedCard || "카드 선택"}</span>
-                  {svgOrder.chevron && <SvgIcon d={svgOrder.chevron} size={14} viewBox="0 0 24 24" />}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </button>
                 {showCardDropdown && (
                   <div className="absolute left-0 right-0 top-full z-10 mt-[4px]">
@@ -184,7 +183,7 @@ export default function OrderPage({ onComplete, onBack }: Props) {
                 <button onClick={() => { setShowInstallDropdown(!showInstallDropdown); setShowCardDropdown(false); }}
                   className="w-full flex items-center justify-between border border-[#e0e0e0] rounded-[8px] px-[14px] py-[12px]">
                   <span className="text-[14px] text-[#1a1a1a]">{selectedInstall || "할부 선택"}</span>
-                  {svgOrder.chevron && <SvgIcon d={svgOrder.chevron} size={14} viewBox="0 0 24 24" />}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </button>
                 {showInstallDropdown && (
                   <div className="absolute left-0 right-0 top-full z-10 mt-[4px]">

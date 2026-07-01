@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { svgCart } from "../components/svg-paths";
 import imgProductThumb from "../img/product-thumb.png";
 
 interface Props {
@@ -11,14 +10,6 @@ interface Props {
 }
 
 const UNIT_PRICE = 549000;
-
-function SvgIcon({ d, size = 24, color = "#1a1a1a", viewBox = "0 0 24 24" }: { d: string; size?: number; color?: string; viewBox?: string }) {
-  return (
-    <svg width={size} height={size} viewBox={viewBox} fill="none">
-      <path d={d} fill={color} />
-    </svg>
-  );
-}
 
 export default function CartPage({ onOrder, onHome }: Props) {
   const [qty, setQty] = useState(1);
@@ -33,7 +24,8 @@ export default function CartPage({ onOrder, onHome }: Props) {
       <div className="flex items-center justify-between px-3 h-[30px] shrink-0 bg-white">
         <span className="text-[13px] font-semibold text-[#1a1a1a]">9:27</span>
         <div className="flex items-center gap-1">
-          {svgCart.wifi && <SvgIcon d={svgCart.wifi} size={18} viewBox="0 0 24 24" />}
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="1" fill="#1a1a1a"/><rect x="5" y="2" width="3" height="10" rx="1" fill="#1a1a1a"/><rect x="10" y="0" width="3" height="12" rx="1" fill="#1a1a1a"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#1a1a1a" opacity="0.3"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 2.4C10.5 2.4 12.7 3.4 14.3 5L16 3.3C13.9 1.3 11.1 0 8 0C4.9 0 2.1 1.3 0 3.3L1.7 5C3.3 3.4 5.5 2.4 8 2.4Z" fill="#1a1a1a"/><circle cx="8" cy="10" r="2" fill="#1a1a1a"/></svg>
           <div className="border border-[#1a1a1a] rounded-[3px] w-[22px] h-[12px] p-[1.5px]"><div className="bg-[#1a1a1a] rounded-[1.5px] h-full w-full"/></div>
         </div>
       </div>
@@ -68,7 +60,7 @@ export default function CartPage({ onOrder, onHome }: Props) {
                 {selected && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 3.5L3.5 6L9 1" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>}
               </div>
               <div className="flex items-center gap-[6px]">
-                {svgCart.home && <SvgIcon d={svgCart.home} size={16} viewBox="0 0 24 24" color="#555"/>}
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L1 5.5V14.5H6V10H10V14.5H15V5.5L8 1.5Z" stroke="#555" strokeWidth="1.3" strokeLinejoin="round"/></svg>
                 <span className="text-[14px] font-bold text-[#1a1a1a]">강남대로점</span>
               </div>
             </div>
@@ -92,8 +84,8 @@ export default function CartPage({ onOrder, onHome }: Props) {
                       <p className="text-[13px] text-[#333] leading-snug mb-[4px]">[5년무상AS] 26.0㎡ 인버터 벽걸이 에어컨 PLX-RAC0825CHWH</p>
                       <p className="text-[13px] font-bold text-[#1a1a1a]">{(UNIT_PRICE).toLocaleString()}원</p>
                     </div>
-                    <button onClick={() => {}} className="shrink-0 self-start">
-                      {svgCart.trash && <SvgIcon d={svgCart.trash} size={20} viewBox="0 0 24 24" color="#aaa" />}
+                    <button className="shrink-0 self-start">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 5H16M7 5V4C7 3.4 7.4 3 8 3H12C12.6 3 13 3.4 13 4V5M6 5L6.8 16H13.2L14 5H6Z" stroke="#aaa" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </button>
                   </div>
                   <div className="mt-[12px] flex items-center justify-between">

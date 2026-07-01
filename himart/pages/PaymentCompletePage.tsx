@@ -1,19 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { svgComplete } from "../components/svg-paths";
+
 import imgProductThumb from "../img/product-thumb.png";
 
 interface Props {
   onContinue: () => void;
-}
-
-function SvgIcon({ d, size = 20, color = "#888", viewBox = "0 0 24 24" }: { d: string; size?: number; color?: string; viewBox?: string }) {
-  return (
-    <svg width={size} height={size} viewBox={viewBox} fill="none">
-      <path d={d} fill={color} />
-    </svg>
-  );
 }
 
 const RELATED = [
@@ -34,7 +26,7 @@ export default function PaymentCompletePage({ onContinue }: Props) {
       <div className="flex items-center justify-between px-3 h-[30px] shrink-0 bg-white">
         <span className="text-[13px] font-semibold text-[#1a1a1a]">9:27</span>
         <div className="flex items-center gap-1">
-          {svgComplete.wifi && <SvgIcon d={svgComplete.wifi} size={18} viewBox="0 0 24 24" />}
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><circle cx="8" cy="10" r="2" fill="#1a1a1a"/></svg>
           <div className="border border-[#1a1a1a] rounded-[3px] w-[22px] h-[12px] p-[1.5px]"><div className="bg-[#1a1a1a] rounded-[1.5px] h-full w-full"/></div>
         </div>
       </div>
@@ -49,27 +41,14 @@ export default function PaymentCompletePage({ onContinue }: Props) {
         {/* 완료 헤더 */}
         <div className="bg-white px-[20px] py-[24px] flex flex-col items-center gap-[12px] mb-[8px]">
           <div className="w-[72px] h-[72px] rounded-full bg-[#fff0f0] flex items-center justify-center">
-            {svgComplete.package ? (
-              <SvgIcon d={svgComplete.package} size={40} viewBox="0 0 48 48" color="#da231c" />
-            ) : (
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <rect x="6" y="12" width="28" height="22" rx="2" stroke="#da231c" strokeWidth="2"/>
-                <path d="M14 12V8C14 6.3 15.3 5 17 5H23C24.7 5 26 6.3 26 8V12" stroke="#da231c" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M14 21H26M14 26H22" stroke="#da231c" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            )}
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="6" y="12" width="28" height="22" rx="2" stroke="#da231c" strokeWidth="2"/><path d="M14 12V8C14 6.3 15.3 5 17 5H23C24.7 5 26 6.3 26 8V12" stroke="#da231c" strokeWidth="2" strokeLinecap="round"/><path d="M14 21H26M14 26H22" stroke="#da231c" strokeWidth="1.5" strokeLinecap="round"/></svg>
           </div>
           <div className="text-center">
             <p className="text-[18px] font-bold text-[#1a1a1a] mb-[4px]">주문이 완료되었습니다!</p>
             <p className="text-[13px] text-[#999]">주문번호 {orderNum}</p>
             <p className="text-[13px] text-[#999] mt-[2px]">{dateStr}</p>
           </div>
-          {svgComplete.check && (
-            <div className="flex items-center gap-[6px] bg-[#f0fff4] rounded-full px-[14px] py-[6px]">
-              <SvgIcon d={svgComplete.check} size={16} viewBox="0 0 24 24" color="#22c55e" />
-              <span className="text-[13px] font-semibold text-[#22c55e]">결제 확인 완료</span>
-            </div>
-          )}
+          <div className="flex items-center gap-[6px] bg-[#f0fff4] rounded-full px-[14px] py-[6px]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12L10 17L19 7" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg><span className="text-[13px] font-semibold text-[#22c55e]">결제 확인 완료</span></div>
         </div>
 
         {/* 배송지 / 상품 요약 카드 */}
@@ -77,7 +56,7 @@ export default function PaymentCompletePage({ onContinue }: Props) {
           <p className="text-[15px] font-bold text-[#1a1a1a] mb-[12px]">주문 상세</p>
 
           <div className="flex items-start gap-[8px] mb-[14px] pb-[14px] border-b border-[#f0f0f0]">
-            {svgComplete.location && <SvgIcon d={svgComplete.location} size={18} viewBox="0 0 24 24" color="#da231c"/>}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.7 2 6 4.7 6 8C6 12.5 12 20 12 20C12 20 18 12.5 18 8C18 4.7 15.3 2 12 2Z" stroke="#da231c" strokeWidth="1.5"/><circle cx="12" cy="8" r="2.5" stroke="#da231c" strokeWidth="1.5"/></svg>
             <div>
               <p className="text-[14px] font-semibold text-[#1a1a1a] mb-[2px]">배송지</p>
               <p className="text-[13px] text-[#555]">서울특별시 강남구 테헤란로 123 하이마트빌딩 101호</p>
