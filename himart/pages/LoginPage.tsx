@@ -270,6 +270,16 @@ function TermsScreen({ onSubmit }: { onSubmit: () => void }) {
               <span className="text-[13px] text-[#333]">개인정보 유효기간</span>
               <span className="text-[12px] text-[#999]">(선택)</span>
             </button>
+            <div className="flex items-center gap-[16px] pl-[30px] pt-[6px]">
+              <div className="flex items-center gap-[4px]">
+                <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4 8L11 1" stroke="#555" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4"/></svg>
+                <span className="text-[12px] text-[#555]">1년</span>
+              </div>
+              <div className="flex items-center gap-[4px]">
+                <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4 8L11 1" stroke="#555" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4"/></svg>
+                <span className="text-[12px] text-[#555]">탈퇴 시 파기</span>
+              </div>
+            </div>
           </div>
         </div>
         <div className="h-6" />

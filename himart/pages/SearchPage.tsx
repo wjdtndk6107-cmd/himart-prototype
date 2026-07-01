@@ -745,7 +745,7 @@ function HangeulKeyboard({ onKey, onBackspace, onSearch }: { onKey: (k: string) 
 }
 
 // ─── SearchPage (루트) ────────────────────────────────────────────
-export default function SearchPage({ onHome, onCart }: { onHome: () => void; onCart: () => void }) {
+export default function SearchPage({ onHome, onCart, onDetail }: { onHome: () => void; onCart: () => void; onDetail?: () => void }) {
   const [screen, setScreen] = useState<Screen>("main");
   const [committed, setCommitted] = useState("");
   const [ime, setIme] = useState<IMEState>(null);
@@ -807,9 +807,9 @@ export default function SearchPage({ onHome, onCart }: { onHome: () => void; onC
         {showAutocomplete ? (
           <InlineAutocomplete query={displayQuery} onPick={handlePick} onSearch={handleSearch} />
         ) : screen === "main" ? (
-          <SearchHomeBody onDetail={() => setScreen("detail")} />
+          <SearchHomeBody onDetail={() => onDetail ? onDetail() : setScreen("detail")} />
         ) : screen === "results" ? (
-          <ResultsScreen query={finalQuery} onDetail={() => setScreen("detail")} />
+          <ResultsScreen query={finalQuery} onDetail={() => onDetail ? onDetail() : setScreen("detail")} />
         ) : (
           <NoResultScreen query={finalQuery} onViewSuggested={() => { setFinalQuery("에어컨"); setScreen("results"); }} />
         )}

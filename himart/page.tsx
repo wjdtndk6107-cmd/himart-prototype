@@ -5,11 +5,12 @@ import { useState } from "react";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import SearchPage from "./pages/SearchPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
 import OrderPage from "./pages/OrderPage";
 import PaymentCompletePage from "./pages/PaymentCompletePage";
 
-type Route = "login" | "home" | "search" | "cart" | "order" | "complete";
+type Route = "login" | "home" | "search" | "detail" | "cart" | "order" | "complete";
 
 export default function HimartPage() {
   const [route, setRoute] = useState<Route>("login");
@@ -30,6 +31,14 @@ export default function HimartPage() {
         <SearchPage
           onHome={() => setRoute("home")}
           onCart={() => setRoute("cart")}
+          onDetail={() => setRoute("detail")}
+        />
+      )}
+      {route === "detail" && (
+        <ProductDetailPage
+          onBack={() => setRoute("search")}
+          onCart={() => setRoute("cart")}
+          onBuy={() => setRoute("order")}
         />
       )}
       {route === "cart" && (
