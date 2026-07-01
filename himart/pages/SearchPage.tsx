@@ -9,6 +9,8 @@ import imgVacuumBespoke from "../img/vacuum-bespoke.png";
 import imgVacuumSlimfit from "../img/vacuum-slimfit.png";
 import imgVacuumJet from "../img/vacuum-jet.png";
 import imgBannerAnsimcare from "../img/banner-ansimcare.png";
+import imgAircon from "../img/product-aircon.png";
+import imgLgAircon from "../img/product-lg-airconditioner.png";
 
 // ─── Types ───────────────────────────────────────────────────────
 type Screen = "main" | "results" | "noresult" | "detail";
@@ -303,33 +305,160 @@ function NoResultScreen({ query, onViewSuggested }: { query: string; onViewSugge
 }
 
 // ─── 검색결과 ─────────────────────────────────────────────────────
+const RESULT_PRODUCTS = [
+  {
+    brand: "PLUX",
+    name: "[5년무상AS] 26.0㎡ 인버터 벽걸이 에어컨 PLX-RAC0825CHWH [전국기본설치비 포함]",
+    price: "549,000",
+    originalPrice: "649,000",
+    discount: "15%",
+    rating: "4.6",
+    reviewCount: "43",
+    tags: ["구독 가능", "가전 보험"],
+    img: imgAircon,
+  },
+  {
+    brand: "LG전자",
+    name: "오브제 쿨 에어컨",
+    price: "62,100",
+    originalPrice: "87,000",
+    discount: "10%",
+    rating: "4.6",
+    reviewCount: "43",
+    tags: ["구독 가능", "가전 보험"],
+    img: imgLgAircon,
+  },
+  {
+    brand: "LG전자",
+    name: "오브제 쿨 에어컨",
+    price: "62,100",
+    originalPrice: "87,000",
+    discount: "10%",
+    rating: "4.6",
+    reviewCount: "43",
+    tags: ["구독 가능", "가전 보험"],
+    img: imgLgAircon,
+  },
+  {
+    brand: "LG전자",
+    name: "오브제 쿨 에어컨",
+    price: "62,100",
+    originalPrice: "87,000",
+    discount: "10%",
+    rating: "4.6",
+    reviewCount: "43",
+    tags: ["구독 가능", "가전 보험"],
+    img: imgLgAircon,
+  },
+];
+
+const FILTER_CHIPS = ["감사페스티벌", "가전 전문가 간편상담", "월납부 구독상품", "월납부 구독상품"];
+
+const SPEC_FILTERS = [
+  { label: "브랜드", options: ["삼성", "LG", "위니아", "캐리어"] },
+  { label: "전체용량", options: ["~300L", "300~500L", { text: "500L~", hot: true }] },
+  { label: "도어수", options: ["1도어", { text: "2도어", hot: true }, "4도어"] },
+];
+
 function ResultsScreen({ query, onDetail }: { query: string; onDetail: () => void }) {
-  const products = [
-    { name: "[5년무상AS] 26.0㎡ 인버터 벽걸이 에어컨 PLX-RAC0825CHWH", price: "549,000", originalPrice: "649,000", discount: "15%", color: "#f0f8ff" },
-    { name: "캐리어 인버터 벽걸이에어컨 EARB-0081FAWSD (26.0㎡)", price: "616,000", originalPrice: "680,000", discount: "9%", color: "#f0fff4" },
-    { name: "LG 휘센 스탠드 에어컨 23평 FQ23VDKBA2", price: "1,499,000", originalPrice: "1,899,000", discount: "21%", color: "#fff0f0" },
-    { name: "삼성 비스포크 무풍에어컨 갤러리 AF17CB9500GH", price: "2,090,000", originalPrice: "2,590,000", discount: "19%", color: "#f5f0ff" },
-  ];
+  const [activeChip, setActiveChip] = useState(0);
 
   return (
-    <div className="size-full overflow-y-auto bg-white font-['Pretendard',sans-serif]">
-      <div className="px-[16px] py-[12px] flex items-center justify-between border-b border-[#f0f0f0]">
-        <span className="text-[13px] text-[#666]">&quot;{query}&quot; 검색결과 <span className="font-bold text-[#1a1a1a]">24</span>개</span>
-        <div className="flex items-center gap-[8px]">
-          <button className="text-[13px] text-[#666]">필터</button>
-          <button className="text-[13px] text-[#666] border border-[#e5e5e5] rounded-[4px] px-[8px] py-[4px]">인기순 ▾</button>
+    <div className="size-full overflow-y-auto bg-white">
+      {/* 필터 칩 */}
+      <div className="flex gap-[8px] px-[16px] py-[12px] overflow-x-auto shrink-0">
+        {FILTER_CHIPS.map((chip, i) => (
+          <button
+            key={i}
+            onClick={() => setActiveChip(i)}
+            className="shrink-0 h-[34px] px-[14px] rounded-[999px] text-[13px] font-medium transition-colors"
+            style={{
+              background: activeChip === i ? "#da231c" : "white",
+              color: activeChip === i ? "white" : "#333",
+              border: activeChip === i ? "none" : "1px solid #ddd",
+            }}
+          >
+            {chip}
+          </button>
+        ))}
+      </div>
+
+      {/* 가전 스펙 필터 */}
+      <div className="border-t border-b border-[#eee] px-[16px] py-[4px]">
+        <p className="text-[13px] font-bold text-[#1a1a1a] py-[10px]">가전 스펙 필터</p>
+        {SPEC_FILTERS.map((row, ri) => (
+          <div key={ri} className="flex items-center gap-[0px] py-[10px] border-t border-[#f0f0f0]">
+            <span className="text-[13px] text-[#555] w-[60px] shrink-0">{row.label}</span>
+            <div className="flex gap-[16px] flex-wrap">
+              {row.options.map((opt, oi) => {
+                const text = typeof opt === "string" ? opt : opt.text;
+                const hot = typeof opt === "object" && opt.hot;
+                return (
+                  <div key={oi} className="relative flex items-center">
+                    <span className="text-[13px] text-[#1a1a1a]">{text}</span>
+                    {hot && (
+                      <span className="absolute -top-[8px] -right-[20px] text-[9px] font-bold text-[#da231c]">HOT</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 정렬 바 */}
+      <div className="flex items-center justify-between px-[16px] py-[10px] border-b border-[#eee]">
+        <button className="flex items-center gap-[4px]">
+          <div className="w-[16px] h-[16px] rounded-full border border-[#888] flex items-center justify-center">
+            <span className="text-[10px] text-[#888] font-bold leading-none">+</span>
+          </div>
+          <span className="text-[13px] text-[#555]">상품비교</span>
+        </button>
+        <div className="flex items-center gap-[10px]">
+          <button className="flex items-center gap-[4px]">
+            <span className="text-[13px] text-[#1a1a1a] font-medium">판매랭킹순</span>
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+              <path d="M1 1L5 5L9 1" stroke="#333" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.3"/>
+            </svg>
+          </button>
+          <button className="flex items-center justify-center w-[28px] h-[28px]">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M3 5H17M5 10H15M8 15H12" stroke="#333" strokeLinecap="round" strokeWidth="1.4"/>
+            </svg>
+          </button>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-[1px] bg-[#f0f0f0]">
-        {products.map((p, i) => (
-          <button key={i} onClick={onDetail} className="bg-white p-[12px] text-left">
-            <div className="w-full aspect-square rounded-[8px] mb-[8px] relative flex items-center justify-center" style={{ background: p.color }}>
-              <svg width="60" height="60" viewBox="0 0 60 60" fill="none"><rect x="8" y="15" width="44" height="30" rx="3" fill="#ddd"/><rect x="12" y="19" width="36" height="22" rx="2" fill="#1a1a1a"/><circle cx="30" cy="30" r="8" stroke="#4a9eff" strokeWidth="1.5"/><rect x="20" y="45" width="20" height="3" rx="1.5" fill="#ddd"/></svg>
-              <span className="absolute top-2 left-2 bg-[#da231c] text-white text-[10px] px-[6px] py-[2px] rounded-full font-semibold">{p.discount}</span>
+
+      {/* 상품 리스트 */}
+      <div className="divide-y divide-[#f0f0f0]">
+        {RESULT_PRODUCTS.map((p, i) => (
+          <button key={i} onClick={onDetail} className="w-full flex gap-[14px] px-[16px] py-[16px] text-left items-start">
+            {/* 상품 이미지 */}
+            <div className="shrink-0 w-[130px] h-[130px] bg-[#f5f6f7] rounded-[8px] relative overflow-hidden">
+              <Image src={p.img} alt={p.brand} fill className="object-contain p-[8px]" />
             </div>
-            <p className="text-[12px] text-[#333] leading-tight line-clamp-2 mb-[4px]">{p.name}</p>
-            <p className="text-[11px] text-[#999] line-through">{p.originalPrice}원</p>
-            <p className="text-[14px] font-bold text-[#1a1a1a]">{p.price}원</p>
+            {/* 상품 정보 */}
+            <div className="flex-1 min-w-0 flex flex-col gap-[4px]">
+              <p className="text-[12px] text-[#888]">{p.brand}</p>
+              <p className="text-[14px] text-[#1a1a1a] leading-[1.4] line-clamp-2">{p.name}</p>
+              <p className="text-[12px] text-[#aaa] line-through">{p.originalPrice}</p>
+              <div className="flex items-center gap-[4px]">
+                <span className="text-[15px] font-bold text-[#1a1a1a]">{p.discount}</span>
+                <span className="text-[15px] font-bold text-[#da231c]">{p.price}</span>
+                <span className="text-[13px] text-[#da231c]">원</span>
+              </div>
+              <div className="flex items-center gap-[4px]">
+                <span className="text-[#f5a623] text-[12px]">★</span>
+                <span className="text-[12px] text-[#555]">{p.rating} 리뷰 {p.reviewCount}</span>
+              </div>
+              <p className="text-[12px] text-[#888]">무료배송 | 기본설치비무료</p>
+              <div className="flex gap-[6px] mt-[2px]">
+                {p.tags.map((tag) => (
+                  <span key={tag} className="text-[11px] text-[#666] border border-[#ddd] rounded-[4px] px-[6px] py-[2px]">{tag}</span>
+                ))}
+              </div>
+            </div>
           </button>
         ))}
       </div>
@@ -526,26 +655,57 @@ function DetailScreen({ onBack, onBuy, onCart }: { onBack: () => void; onBuy: ()
 }
 
 // ─── 검색바 ──────────────────────────────────────────────────────
-function SearchBar({ query, displayQuery, focused, onFocus, onKey, onBackspace, onSearch, onClear, onBack }: {
+function SearchBar({ query, displayQuery, focused, onFocus, onKey, onBackspace, onSearch, onClear, onBack, showIcons, onCart }: {
   query: string; displayQuery: string; focused: boolean;
   onFocus: () => void; onKey: (k: string) => void; onBackspace: () => void;
   onSearch: () => void; onClear: () => void; onBack: () => void;
+  showIcons?: boolean; onCart?: () => void;
 }) {
   return (
     <div className="shrink-0 flex items-center px-[12px] py-[10px] gap-[8px] border-b border-[#f0f0f0] bg-white">
-      <button onClick={onBack} className="p-[4px]">
+      <button onClick={onBack} className="p-[4px] shrink-0">
         <svg width="9" height="16" viewBox="0 0 9 16" fill="none"><path d="M8 1L1 8L8 15" stroke="#1a1a1a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </button>
-      <button onClick={onFocus} className="flex-1 h-[40px] bg-[#f5f6f7] rounded-[8px] flex items-center px-[12px] gap-[8px]">
-        <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><circle cx="7.5" cy="7.5" r="5.5" stroke="#888" strokeWidth="1.5"/><path d="M12 12L15 15" stroke="#888" strokeWidth="1.5" strokeLinecap="round"/></svg>
-        <span className={`flex-1 text-[14px] text-left ${displayQuery ? "text-[#1a1a1a]" : "text-[#aaa]"}`}>
+      <button onClick={onFocus} className="flex-1 h-[40px] bg-[#f5f6f7] rounded-[999px] flex items-center px-[12px] gap-[8px] min-w-0">
+        <span className={`flex-1 text-[14px] text-left truncate ${displayQuery ? "text-[#1a1a1a]" : "text-[#aaa]"}`}>
           {displayQuery || "검색어를 입력해주세요"}
         </span>
         {displayQuery && (
-          <button onClick={(e) => { e.stopPropagation(); onClear(); }} className="text-[#999]">✕</button>
+          <button onClick={(e) => { e.stopPropagation(); onClear(); }} className="shrink-0 w-[18px] h-[18px] rounded-full bg-[#c0c0c0] flex items-center justify-center">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1 1L7 7M7 1L1 7" stroke="white" strokeWidth="1.4" strokeLinecap="round"/></svg>
+          </button>
         )}
+        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" className="shrink-0"><circle cx="7.5" cy="7.5" r="5.5" stroke="#888" strokeWidth="1.5"/><path d="M12 12L15 15" stroke="#888" strokeWidth="1.5" strokeLinecap="round"/></svg>
       </button>
-      <button onClick={onSearch} className="text-[14px] font-medium text-[#1a1a1a]">검색</button>
+      {showIcons ? (
+        <>
+          {/* 바코드 아이콘 */}
+          <button className="shrink-0 p-[4px]">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="4" width="2" height="16" fill="#1a1a1a"/>
+              <rect x="6" y="4" width="1" height="16" fill="#1a1a1a"/>
+              <rect x="8.5" y="4" width="2" height="16" fill="#1a1a1a"/>
+              <rect x="12" y="4" width="1" height="16" fill="#1a1a1a"/>
+              <rect x="14" y="4" width="2" height="16" fill="#1a1a1a"/>
+              <rect x="17" y="4" width="1" height="16" fill="#1a1a1a"/>
+              <rect x="19" y="4" width="2" height="16" fill="#1a1a1a"/>
+            </svg>
+          </button>
+          {/* 장바구니 아이콘 (뱃지) */}
+          <button onClick={onCart} className="shrink-0 p-[4px] relative">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M3 3H5L7.5 16H17.5L20 7H7" stroke="#1A1A1A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="10" cy="19.5" r="1.5" fill="#1A1A1A"/>
+              <circle cx="17" cy="19.5" r="1.5" fill="#1A1A1A"/>
+            </svg>
+            <span className="absolute -top-[1px] -right-[1px] w-[16px] h-[16px] rounded-full bg-[#da231c] flex items-center justify-center">
+              <span className="text-white text-[9px] font-bold leading-none">1</span>
+            </span>
+          </button>
+        </>
+      ) : (
+        <button onClick={onSearch} className="text-[14px] font-medium text-[#1a1a1a] shrink-0">검색</button>
+      )}
     </div>
   );
 }
@@ -639,6 +799,8 @@ export default function SearchPage({ onHome, onCart }: { onHome: () => void; onC
         onKey={handleKey} onBackspace={handleBackspace} onSearch={handleSearch}
         onClear={handleClear}
         onBack={() => { if (screen !== "main") { setScreen("main"); setCommitted(""); setIme(null); } else { onHome(); } }}
+        showIcons={screen === "results" && !keyboardOpen}
+        onCart={onCart}
       />
 
       <div className="flex-1 min-h-0 overflow-hidden">
