@@ -5,6 +5,10 @@ import Image from "next/image";
 import imgProductMain from "../img/product-main.png";
 import imgDetailImage from "../img/product-detail.png";
 import imgReviewThumbnail from "../img/review-thumb.png";
+import imgVacuumBespoke from "../img/vacuum-bespoke.png";
+import imgVacuumSlimfit from "../img/vacuum-slimfit.png";
+import imgVacuumJet from "../img/vacuum-jet.png";
+import imgBannerAnsimcare from "../img/banner-ansimcare.png";
 
 // ─── Types ───────────────────────────────────────────────────────
 type Screen = "main" | "results" | "noresult" | "detail";
@@ -98,34 +102,155 @@ function InlineAutocomplete({ query, onPick, onSearch }: { query: string; onPick
   );
 }
 
-// ─── 검색 메인 홈 (간소화) ────────────────────────────────────────
+// ─── 검색 메인 홈 ─────────────────────────────────────────────────
 function SearchHomeBody({ onDetail }: { onDetail: () => void }) {
+  const recentKeywords = ["에어컨", "보조배터리", "건조기"];
+  const suggestedKeywords = ["냉장고", "스타일러", "에어플라이어", "그램 노트북"];
+  const popularKeywords = ["에어컨", "선풍기", "무풍에어컨", "벽걸이에어컨", "스탠드 에어컨", "실링팬"];
+
+  const recentProducts = [
+    { brand: "LG전자", name: "디오스 오브제컬렉션 정수기", discount: "27%", price: "529,000", benefit: "390,000" },
+    { brand: "삼성전자", name: "비스포크 김치플러스 4도어", discount: "27%", price: "1,890,000", benefit: "1,290,000" },
+    { brand: "쿠쿠", name: "스탠드형 김치냉장고 300L", price: "77,544", benefit: "56,544", subscript: true },
+    { brand: "LG전자", name: "디오스 오브제컬렉션 정수기", discount: "27%", price: "529,000", benefit: "390,000" },
+  ];
+
+  const aiProducts = [
+    { img: imgVacuumBespoke, brand: "삼성전자", name: "BESPOKE AI 제트 Lite\n무선청소기", discount: "27%", price: "1,231,000", benefit: "1,181,760" },
+    { img: imgVacuumSlimfit, brand: "쿠쿠", name: "슬림핏 청소기\nCVC-G08FF30NW", discount: "27%", price: "285,000" },
+    { img: imgVacuumJet, brand: "삼성전자", name: "[제주지역한정]삼성\n청소기 제트 VS20C954AQB", discount: "27%", price: "529,000" },
+  ];
+
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden bg-white">
-      <div className="px-[16px] py-[20px]">
-        <p className="text-[14px] font-bold text-[#1a1a1a] mb-[12px]">최근 검색어</p>
-        <div className="flex flex-wrap gap-[8px] mb-[20px]">
-          {["에어컨","삼성냉장고","LG세탁기","공기청정기"].map(kw => (
-            <button key={kw} className="border border-[#e5e5e5] rounded-[99px] px-[12px] py-[6px] text-[13px] text-[#333]">{kw}</button>
+      {/* 최근 검색어 */}
+      <div className="px-[16px] py-[16px]">
+        <div className="flex items-center justify-between mb-[10px]">
+          <p className="text-[14px] font-bold text-[#1a1a1a]">최근 검색어</p>
+          <button className="text-[12px] text-[#666]">전체 삭제</button>
+        </div>
+        <div className="flex flex-wrap gap-[8px]">
+          {recentKeywords.map(kw => (
+            <div key={kw} className="flex items-center gap-[4px] border border-[#e5e5e5] rounded-[999px] px-[14px] py-[9px] h-[32px]">
+              <span className="text-[13px] text-[#1a1a1a]">{kw}</span>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3.5 3.5L10.5 10.5M10.5 3.5L3.5 10.5" stroke="#666666" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.083"/>
+              </svg>
+            </div>
           ))}
         </div>
-        <p className="text-[14px] font-bold text-[#1a1a1a] mb-[12px]">추천 상품</p>
-        <div className="grid grid-cols-2 gap-[12px]">
-          {[
-            { name: "LG 휘센 에어컨 23평", price: "1,899,000", badge: "최대 20%", color: "#e8f4ff" },
-            { name: "삼성 비스포크 냉장고", price: "2,590,000", badge: "특별할인", color: "#fff0e8" },
-            { name: "LG 오브제 세탁기 25kg", price: "1,290,000", badge: "L포인트↑", color: "#f0f8e8" },
-            { name: "플럭스 벽걸이 에어컨 8평", price: "549,000", badge: "15%↓", color: "#f5f0ff" },
-          ].map(({ name, price, badge, color }) => (
-            <button key={name} className="text-left" onClick={onDetail}>
-              <div className="w-full aspect-square rounded-[10px] flex items-center justify-center mb-2 relative" style={{ background: color }}>
-                <svg width="60" height="60" viewBox="0 0 60 60" fill="none"><rect x="8" y="15" width="44" height="30" rx="3" fill="#ddd"/><rect x="12" y="19" width="36" height="22" rx="2" fill="#1a1a1a"/><circle cx="30" cy="30" r="8" stroke="#4a9eff" strokeWidth="1.5"/><rect x="20" y="45" width="20" height="3" rx="1.5" fill="#ddd"/></svg>
-                <span className="absolute top-2 left-2 bg-[#da231c] text-white text-[10px] px-[6px] py-[2px] rounded-full font-semibold">{badge}</span>
+      </div>
+
+      <div className="h-[1px] bg-[#f0f0f0]"/>
+
+      {/* 추천 검색어 */}
+      <div className="px-[16px] py-[16px]">
+        <div className="flex items-center gap-[6px] mb-[10px]">
+          <p className="text-[14px] font-bold text-[#1a1a1a]">추천 검색어</p>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 2.25C5.27208 2.25 2.25 5.27208 2.25 9C2.25 12.7279 5.27208 15.75 9 15.75C12.7279 15.75 15.75 12.7279 15.75 9C15.75 5.27208 12.7279 2.25 9 2.25ZM9 13.5C8.37868 13.5 7.875 12.9963 7.875 12.375C7.875 11.7537 8.37868 11.25 9 11.25C9.62132 11.25 10.125 11.7537 10.125 12.375C10.125 12.9963 9.62132 13.5 9 13.5ZM9.75 9.75H8.25V4.5H9.75V9.75Z" fill="#AEAEB2"/>
+          </svg>
+        </div>
+        <div className="flex flex-wrap gap-[8px]">
+          {suggestedKeywords.map(kw => (
+            <div key={kw} className="flex items-center border border-[#e5e5e5] rounded-[999px] px-[14px] py-[9px] h-[33px]">
+              <span className="text-[13px] text-[#1a1a1a]">{kw}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="h-[4px] bg-[#f5f5f5]"/>
+
+      {/* 최근 관심 & 장바구니 상품 */}
+      <div className="px-[16px] py-[16px]">
+        <p className="text-[14px] font-bold text-[#1a1a1a] mb-[10px]">최근 관심 &amp; 장바구니 상품</p>
+        <div className="flex gap-[10px] overflow-x-auto pb-[4px]">
+          {recentProducts.map((p, i) => (
+            <button key={i} onClick={onDetail} className="shrink-0 w-[120px] flex flex-col gap-[2px] text-left">
+              <div className="w-[120px] h-[120px] rounded-[10px] bg-[#f5f6f7] flex items-center justify-center">
+                <svg width="46" height="56" viewBox="0 0 46 56" fill="none">
+                  <path d="M3 6C3 4.34315 4.34315 3 6 3H30L43 16V50C43 51.6569 41.6569 53 40 53H6C4.34315 53 3 51.6569 3 50V6Z" fill="#F2F4F6" stroke="#CDD3DA" strokeWidth="1.05"/>
+                  <path d="M11.1 22.4H34.9" stroke="#CDD3DA" strokeWidth="0.875"/>
+                  <path d="M11.1 38.5H34.9" stroke="#CDD3DA" strokeWidth="0.875"/>
+                </svg>
               </div>
-              <p className="text-[12px] text-[#333] leading-tight">{name}</p>
-              <p className="text-[13px] font-bold text-[#1a1a1a] mt-1">{price}원</p>
+              <p className="text-[12px] text-[#767676] pt-[6px]">{p.brand}</p>
+              <p className="text-[13px] text-[#1a1a1a] leading-[17.55px] line-clamp-2">{p.name}</p>
+              {p.discount && (
+                <div className="flex gap-[4px] items-center">
+                  <span className="text-[13px] font-bold text-[#ff1344]">{p.discount}</span>
+                  <span className="text-[13px] font-bold text-[#1a1a1a]">{p.price}원</span>
+                </div>
+              )}
+              {!p.discount && <p className="text-[13px] font-bold text-[#1a1a1a]">{p.price}원</p>}
+              {p.benefit && (
+                <p className="text-[10px] text-[#ff1344]">{p.benefit}원 최대혜택가</p>
+              )}
             </button>
           ))}
+        </div>
+      </div>
+
+      <div className="h-[4px] bg-[#f5f5f5]"/>
+
+      {/* AI 가전 플래너 상품 추천 */}
+      <div className="px-[16px] py-[16px]">
+        <div className="flex items-center gap-[6px] mb-[10px] h-[18px]">
+          <p className="text-[14px] font-bold text-[#1a1a1a]">AI 가전 플래너 상품 추천</p>
+          <div className="flex items-center justify-center border border-[#aeaeb2] rounded-[7.5px] size-[15px]">
+            <span className="text-[10px] font-bold text-[#aeaeb2]">i</span>
+          </div>
+        </div>
+        <div className="flex gap-[7px] overflow-x-auto pb-[4px]">
+          {aiProducts.map((p, i) => (
+            <button key={i} onClick={onDetail} className="shrink-0 w-[120px] flex flex-col gap-[2px] text-left">
+              <div className="w-[120px] h-[120px] rounded-[10px] bg-[#f5f6f7] relative">
+                <Image src={p.img} alt={p.brand} className="object-contain rounded-[10px]" fill />
+              </div>
+              <p className="text-[12px] text-[#767676] pt-[6px]">{p.brand}</p>
+              <div className="h-[35px] overflow-hidden">
+                {p.name.split("\n").map((line, j) => (
+                  <p key={j} className="text-[13px] text-[#1a1a1a] leading-[17.55px]">{line}</p>
+                ))}
+              </div>
+              <div className="flex gap-[4px] items-center">
+                {p.discount && <span className="text-[13px] font-bold text-[#ff1344]">{p.discount}</span>}
+                <span className="text-[13px] font-bold text-[#1a1a1a]">{p.price}원</span>
+              </div>
+              {p.benefit && (
+                <p className="text-[10px] text-[#ff1344]">{p.benefit}원 최대혜택가</p>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="h-[4px] bg-[#f5f5f5]"/>
+
+      {/* 최근 1시간 인기 검색어 */}
+      <div className="px-[16px] py-[16px]">
+        <div className="flex items-center justify-between mb-[10px] h-[18px]">
+          <p className="text-[14px] font-bold text-[#1a1a1a]">최근 1시간 인기 검색어</p>
+          <p className="text-[12px] text-[#999]">11:00 업데이트</p>
+        </div>
+        <div className="grid grid-cols-2 gap-x-[10px]">
+          {popularKeywords.map((kw, i) => (
+            <div key={kw} className="flex items-center gap-[8px] py-[8px] text-[14px] text-[#1a1a1a]">
+              <span className="font-medium shrink-0">{i + 1}</span>
+              <span>{kw}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="h-[4px] bg-[#f5f5f5]"/>
+
+      {/* 안심케어 서비스 */}
+      <div className="px-[16px] py-[16px]">
+        <p className="text-[14px] font-bold text-[#1a1a1a] mb-[10px]">안심케어 서비스</p>
+        <div className="relative w-full rounded-[4px] overflow-hidden" style={{ aspectRatio: "399/194" }}>
+          <Image src={imgBannerAnsimcare} alt="안심케어 서비스" className="object-cover" fill />
         </div>
       </div>
     </div>
