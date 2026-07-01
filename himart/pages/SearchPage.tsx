@@ -765,7 +765,7 @@ export default function SearchPage({ onHome, onCart, onDetail }: { onHome: () =>
     if (!q) return;
     setFinalQuery(q);
     setKeyboardOpen(false);
-    setScreen(q.includes("에어") ? "results" : "noresult");
+    setScreen("results");
   };
   const handlePick = (s: string) => { setCommitted(s); setIme(null); };
   const handleClear = () => { setCommitted(""); setIme(null); };
