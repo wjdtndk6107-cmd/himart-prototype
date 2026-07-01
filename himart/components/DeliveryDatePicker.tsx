@@ -117,20 +117,25 @@ function CalendarView({ onClose, onComplete }: { onClose: () => void; onComplete
 
 function InfoPopup({ onConfirm, onClose }: { onConfirm: () => void; onClose: () => void }) {
   const items = [
-    "상품 재고 상황에 따라 입력하신 희망배송일과 다른 날짜에 배송받으실 수 있습니다.",
-    "전시/미개봉특가상품 등 일부 상품은 별도 해피콜 및 상품 준비/포장 등의 일정이 소요되므로 입력하신 희망배송일과 다른 날짜에 배송받으실 수 있습니다.",
-    "배송기사님의 설치를 진행하는 경우, 방문시간 지정을 위해 배송 전일 오후 별도 연락이 진행됩니다.",
-    "LG, 삼성전자 배송은 업체배송의 경우 배송일 확정 시 업체에서 배송일 안내 알림톡이 발송됩니다.",
-    "택배배송의 경우 희망배송일이 적용되지 않습니다.",
-    "물류 휴무일엔 배송이 불가합니다.",
+    <>상품 재고 상황에 따라 입력하신 <span className="font-bold text-[#006dda]">희망배송일과 다른 날짜</span>에 <span className="font-bold text-[#006dda]">배송</span>받으실 수 있습니다.</>,
+    <><span className="font-bold text-[#006dda]">전시/미개봉특가상품</span> 등 일부 상품은 별도 <span className="font-bold text-[#006dda]">해피콜 및 상품 준비/포장</span> 등의 일정이 소요되므로 입력하신 <span className="font-bold text-[#006dda]">희망배송일과 다른 날짜에 배송</span>받으실 수 있습니다</>,
+    <>배송기사님의 설치를 진행하는 경우, 방문시간 지정을 위해 배송 전일 오후 별도 연락이 진행됩니다. (오늘설치의 경우, 주문 당일 오후 연락 예정)<br /><span className="font-bold text-[#006dda]">(히마마트 안심케어(가전클리닝) 서비스 희망일 전일 연락 예정)</span></>,
+    <><span className="font-bold text-[#006dda]">LG, 삼성전자</span> 배송는 <span className="font-bold text-[#006dda]">업체배송의 경우 배송일 확정 시 업체에서 배송일 안내 알림톡이 발송</span>됩니다.</>,
+    <>택배배송의 경우 희망배송일이 적용되지 않습니다.</>,
+    <>물류 휴무일엔 배송이 불가합니다.</>,
+    <>하이마트 안심케어 가전클리닝 다품목 구매서비스 희망일은 동일 날짜로만 지정 가능합니다.</>,
   ];
+
   return (
     <div className="absolute inset-0 bg-[rgba(0,0,0,0.7)] z-20 flex items-start justify-center pt-[162px]">
-      <div className="bg-white rounded-[8px] shadow-lg w-[360px] max-h-[520px] flex flex-col overflow-hidden mx-[15px]"
-        onClick={(e) => e.stopPropagation()}>
+      <div
+        className="bg-white rounded-[8px] w-[360px] max-h-[520px] flex flex-col overflow-hidden mx-[15px]"
+        style={{ boxShadow: "0px 4px 1px rgba(0,0,0,0.25)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex flex-col gap-[12px] items-start px-[16px] pt-[16px] pb-[8px]">
-          <p className="font-bold text-[#333] text-[16px]">배송 /설치 관련 안내</p>
-          <p className="font-medium text-[#e00] text-[14px]">배송 유의 사항</p>
+          <p className="font-bold leading-[24px] text-[#333] text-[16px]">배송 /설치 관련 안내</p>
+          <p className="font-medium leading-[16px] text-[#e00] text-[14px]">배송 유의 사항</p>
         </div>
         <div className="flex-1 overflow-y-auto px-[16px] pb-[16px] flex flex-col gap-[8px]">
           {items.map((item, i) => (
@@ -141,7 +146,10 @@ function InfoPopup({ onConfirm, onClose }: { onConfirm: () => void; onClose: () 
           ))}
         </div>
         <div className="flex justify-center px-[16px] pb-[16px]">
-          <button onClick={onConfirm} className="bg-[#333] h-[40px] rounded-[4px] w-[104px] flex items-center justify-center">
+          <button
+            onClick={onConfirm}
+            className="bg-[#333] h-[40px] rounded-[4px] w-full flex items-center justify-center"
+          >
             <span className="font-bold text-[16px] text-white">확인</span>
           </button>
         </div>
