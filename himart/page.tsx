@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import "./himart.css";
+
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import SearchPage from "./pages/SearchPage";
